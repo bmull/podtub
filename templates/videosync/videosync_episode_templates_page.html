@@ -1,0 +1,159 @@
+{% extends "theme/base.html" %}
+{% load static %}
+{% load humanize %}
+{% load bootstrap4 %}
+
+{% block styles %}{% include "videosync/_template_styles.html" %}{% endblock styles %}
+
+{% block content %}
+
+    <section class="slice-xs bg-base-4">
+        <div class="container">
+            <a href="{% url 'videosync_episode_list_page' podcast.slug %}" class="c-white">← Back to Episode List</a>
+        </div>
+    </section>
+
+    <section class="slice slice-sm border-bottom">
+        <div class="container">
+            <div class="row my-4">
+                <div class="col-md-4 bg-light border">
+                    <div class="row my-4">
+                        <div class="col-12">
+                            <div class="row">
+                                <div class="col-12 mb-3">
+                                    <h2 class="heading heading-4">
+                                        Podcast Settings
+                                        <a href="{{podcast.get_edit_url}}?redirect={{request.get_full_path}}" class="btn btn-styled btn-base-1 btn-circle btn-outline btn-xs">Edit</a>
+                                    </h2>
+                                </div>
+                                <div class="col-12 mb-3">
+                                    <span class="heading heading-light heading-sm text-uppercase strong-300">Name: </span>
+                                    {{podcast.name}}
+                                </div>
+                                <div class="col-4">
+                                    <div class="heading heading-light heading-sm text-uppercase strong-300 mb-2">Artwork</div>
+                                    <img src="{{podcast.image_path}}" class="w-100">
+                                </div>
+                                <div class="col-4">
+                                    <div class="heading heading-light heading-sm text-uppercase strong-300 mb-2">Logo</div>
+                                    <img src="{{podcast.logo_path}}" class="w-100">
+                                </div>
+                                <div class="col-4">
+                                    <div class="heading heading-light heading-sm text-uppercase strong-300 mb-2">Colors</div>
+                                    <div class="btn btn-styled btn-xs btn-block" style="background-color: {{podcast.primary_color}}; color: {{podcast.secondary_color}};">Primary</div>
+                                    <div class="btn btn-styled btn-xs btn-block mt-2" style="background-color: {{podcast.secondary_color}}; color: {{podcast.primary_color}};">Secondary</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-12">
+                            <div class="row">
+                                <div class="col-12 mt-5">
+                                    <h2 class="heading heading-4">
+                                        Episode Settings
+                                        <a href="{{episode.get_edit_url}}?redirect={{request.get_full_path}}" class="btn btn-styled btn-base-1 btn-circle btn-outline btn-xs">Edit</a>
+                                    </h2>
+                                    {% if not episode.image_path %}
+                                        <div class="alert alert-info">To show what the templates should look like, we have included a sample image. Click edit to add your own</div>
+                                    {% endif %}
+                                </div>
+                                <div class="col-4">
+                                    <div class="heading heading-light heading-sm text-uppercase strong-300 mb-2">Text</div>
+                                    {{episode.text}}
+                                </div>
+                                <div class="col-4">
+                                    <div class="heading heading-light heading-sm text-uppercase strong-300 mb-2">Number</div>
+                                    {{episode.number}}
+                                </div>
+                                <div class="col-4">
+                                    <div class="heading heading-light heading-sm text-uppercase strong-300 mb-2">Image</div>
+                                    <img src="{{episode.image}}" class="w-100">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-8">
+
+
+
+                    {% if saved_template %}
+                        <div class="row">
+                            <div class="col-lg-12">
+                                <strong>Chosen Template</strong>
+                                {% include "videosync/_template.html" with template=saved_template hide_refine=saved_template %}
+                            </div>
+                            <div class="col-lg-12 pt-5 pb-2">
+                                <h2 class="heading heading-4">Choose a different template</h2>
+                            </div>
+                        </div>
+
+                    {% endif %}
+
+
+                    {% for theme in themes %}
+                        <div class="row">
+                            {% for template in theme %}
+                                <div class="{% if target_template %}col-lg-12{% else %}col-lg-12{% endif %} mb-3" {% if target_template %}id="targetTemplate"{% endif %}>
+                                    <div class="podart-container">
+                                        {% include "videosync/_template.html" with hide_refine=target_template %}
+                                    </div>
+                                </div>
+                            {% endfor %}
+                            {% if target_template %}
+                                <div class="col-lg-12">
+                                    <p>Now, use the edit buttons above to tweak the colors, photos, logos, etc... until you're happy with it. Then hit save below to save your choice.</p>
+
+                                    <form method="post" action="{{ action_url }}" class="form" id="templateForm">
+                                        {% csrf_token %}
+                                        {% bootstrap_form form %}
+                                        <input type="hidden" name="image_data" id="imageData" />
+                                        <button type="submit" class="btn btn-styled btn-base-1 btn-circle" id="submitBtn">{{form_button_label|default:"Save"}}</button>
+                                        <a href="{{episode.get_absolute_url}}" class="btn btn-styled btn-link ">Back to templates</a>
+                                    </form>
+                                </div>
+
+                            {% endif %}
+                        </div>
+                        <hr>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </section>
+
+{% endblock content %}
+
+{% block scripts %}
+<script type="text/javascript" src="https://cdn.jsdelivr.net/npm/html2canvas@1.0.0-rc.5/dist/html2canvas.min.js"></script>
+    {% if target_template %}
+        <script>
+            function grabTemplate(form){
+                html2canvas($('#targetTemplate .podart-container')[0], {
+                    scale: 2,
+                    useCORS: true,
+                }).then(function(canvas) {
+                    var image_data = canvas.toDataURL();
+                    $("#imageData").val(image_data);
+                    $(form).unbind().submit();
+                });
+            }
+
+            $(document).ready(function(){
+                $("#templateForm").submit(function(e){
+                    e.preventDefault();
+                    if ($('#id_template').val().indexOf('2-') >= 0 && '{{ podcast.blur_image_path }}' === ''){
+                        $.get("{% url 'blur_image_api' podcast.id %}").then((res) => {
+                            document.getElementById('podartImage').style.backgroundImage = 'url(/image-proxy/?url=' + res.imageUrl + ')';
+                            grabTemplate(this);
+                        });
+                    } else {
+                        grabTemplate(this);
+                    }
+                });
+            })
+        </script>
+    {% endif %}
+{% endblock %}
+
+{% block facebook_pixel %}{% endblock facebook_pixel %}
+

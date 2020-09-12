@@ -1,0 +1,34 @@
+<div class="podart {% if wide %}podart-wide{% endif %} template-{{forloop.counter0}}" style="overflow: hidden;">
+    <div class="podart--branding">Synced with <strong>{{STRINGS.site_name}}</strong></div>
+    {% if template.image %}
+        <div class="podart--episode-image" id="podartImage" {{template.image.style_tag|safe}}>
+            <!-- <img src="{{episode.podcast.image_path}}" style="width:100%;height:auto;" /> -->
+        </div>
+    {% endif %}
+    {% if template.logo and podcast.logo_path %}
+        <img class="podart--show-logo" src="/image-proxy/?url={{template.logo.src}}" {{template.logo.style_tag|safe}}>
+    {% endif %}
+    {% if template.second_cover and podcast.image_path %}
+        <img class="podart--show-logo" src="/image-proxy/?url={{template.second_cover.src}}" {{template.second_cover.style_tag|safe}}>
+    {% endif %}
+    <div class="podart--text-container" {{template.text_container.style_tag|safe}}>
+        {% if template.podcast_name and podcast.name %}
+            <div class="podart--podcast-name" {{template.podcast_name.style_tag|safe}}>{{podcast.name}}</div>
+        {% endif %}
+        {% if template.episode_number and episode.number %}
+            <div class="podart--episode-number" {{template.episode_number.style_tag|safe}}>
+                <span class="label" {{template.episode_number_label.style_tag|safe}}>Episode </span>{{episode.number}}
+            </div>
+        {% endif %}
+        {% if template.episode_text %}
+            <div class="podart--episode-text" {{template.episode_text.style_tag|safe}}>{{episode.text}}</div>
+        {% endif %}
+    </div>
+    {% if template.mask %}
+        <div class="podart--mask" {{template.mask.style_tag|safe}}></div>
+    {% endif %}
+</div>
+
+{% if not hide_refine %}
+    <div class="text-center"><a href="?t={{forloop.parentloop.counter0}}-{{forloop.counter0}}">Refine this template</a></div>
+{% endif %}

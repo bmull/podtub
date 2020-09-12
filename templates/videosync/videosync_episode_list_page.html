@@ -1,0 +1,153 @@
+{% extends "dashboard/base_dashboard.html" %}
+{% load static %}
+{% load humanize %}
+{% load bootstrap4 %}
+
+{% block dashboard_section %}
+
+        <div class="row">
+            <div class="col-lg-12">
+                <div class="card mb-3 mt-4">
+                    {% if object.youtube_account and object.youtube_channel_name %}
+                        <div class="card-body rounded">
+                            Your videos are being synced with <strong>{{object.youtube_channel_name}}</strong>
+                        </div>
+                    {% else %}
+                        <div class="card-body rounded no-border bg-red">
+                            <p>
+                                <strong>Setup required!</strong><br>
+                                You need to let us know what YouTube channel you'd like us to sync videos to.
+                            </p>
+                            {% if not object.youtube_connected %}
+                                <a href="{% url 'youtube_connect' podcast.slug %}" class="btn btn-styled btn-circle btn-white c-red btn-icon-left"><i class="fa fa-youtube"></i>Connect YouTube</a>
+                            {% else %}
+                                <a href="{% url 'youtube_channels' podcast.slug %}" class="btn btn-styled btn-circle btn-white c-red btn-icon-left"><i class="fa fa-youtube"></i>Connect YouTube</a>
+                            {% endif %}
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+
+        <div class="row">
+            {% for episode in object_list %}
+
+
+                <div class="col-lg-6">
+                    <div class="card z-depth-2-top mb-4">
+                        <div class="card-body">
+                            <h3 class="heading heading-5 strong-500 mb-0">
+                                {% if episode.season %}
+                                    Season {{episode.season}},
+                                {% endif %}
+                                Episode {{episode.number}}
+                            </h3>
+                        </div>
+                        <div class="card-image">
+                            {% if episode.card_graphic %}
+                                {{episode.card_graphic|safe}}
+                            {% else %}
+                                <div class="text-center bg-base-1 embed-container">
+                                    <div class="mask alpha-10 d-flex justify-content-center align-items-center">
+                                        <a href="{{episode.get_absolute_url}}" class="btn btn-styled btn-circle bg-white">Design Artwork</a>
+                                    </div>
+
+                                </div>
+                            {% endif %}
+                        </div>
+
+                        <div class="card-body">
+                            {{episode.text}}
+                        </div>
+
+                        <div class="card-footer">
+                            <div class="row text-center">
+                                <div class="col">
+                                    {% if episode.artwork_path %}
+                                        <i class="fa fa-fw fa-check-circle text-success"></i><br>
+                                        <a href="{{episode.get_absolute_url}}">Artwork Designed</a>
+                                    {% else %}
+                                        <i class="fa fa-fw fa-photo text-secondary"></i><br>
+                                        <a href="{{episode.get_absolute_url}}">Design Artwork</a>
+                                    {% endif %}
+                                </div>
+                                <div class="col">
+                                    {% if episode.youtube_url and episode.upload_status == episode.SUCCESS %}
+                                        <i class="fa fa-fw fa-check-circle text-success"></i><br>
+                                        <a href="{{episode.youtube_url}}" target="_blank">Published</a>
+                                    {% else %}
+                                        {% if episode.upload_status == episode.FAILED %}
+                                            <i class="fa fa-fw fa-times-circle text-danger"></i><br>Upload Failed!
+                                        {% elif episode.upload_status == episode.IN_PROGRESS %}
+                                            <i class="fa fa-fw fa-circle-o-notch text-primary fa-spin"></i><br>Publishing
+                                        {% elif not episode.upload_status %}
+                                            <div {% if not episode.artwork_path %}class="alpha-2"{% endif %}>
+                                                <i class="fa fa-fw fa-upload text-secondary"></i><br>
+                                                <a href="{% url 'videosync_episode_upload' podcast.slug episode.id %}">Publish to YouTube</a>
+                                            </div>
+                                        {% endif %}
+
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            {% endfor %}
+        </div>
+
+            {% comment %}
+
+                <div class="card mb-3">
+                    <div class="row">
+
+                        <div class="col-lg-8">
+                            <div class="card-body pl-3 py-3">
+                                <h5 class="heading heading-6 strong-500">
+                                    <a href="{"></a>
+                                </h5>
+
+                                <div>
+                                    {% if episode.template %}
+                                        <i class="fa fa-fw fa-check-circle text-success"></i> Artwork created.
+                                        <a href="{{episode.get_absolute_url}}">Edit here</a>.
+                                    {% else %}
+                                        <i class="fa fa-fw fa-times-circle text-danger"></i> Artwork not created.
+                                        <a href="{{episode.get_absolute_url}}">Create it now</a>.
+                                    {% endif %}
+                                </div>
+
+                                <div>
+                                    {% if episode.upload_status == episode.SUCCESS %}
+                                        <i class="fa fa-fw fa-check-circle text-success"></i> Uploaded to YouTube.
+                                        {% if episode.youtube_id %}
+                                            <a href="{{episode.youtube_url}}" target="_blank">Watch video here</a>.
+                                        {% endif %}
+                                    {% elif episode.upload_status == episode.FAILED %}
+                                        <i class="fa fa-fw fa-times-circle text-danger"></i> Upload Failed!
+                                    {% elif episode.upload_status == episode.IN_PROGRESS %}
+                                        <i class="fa fa-fw fa-circle-o-notch fa-spin"></i> Uploading in Progress
+                                    {% elif not episode.upload_status %}
+                                        {% if episode.template %}
+                                            <a href="{% url 'videosync_episode_upload' podcast.slug episode.id %}">Click to Upload</a>.
+                                        {% else %}
+                                            <a href="#">Artwork needed first</a>.
+                                        {% endif %}
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-lg-4">
+                            {% if episode.artwork_path %}
+                                <div class="card-image">
+                                    <a href="{{episode.get_absolute_url}}"><img src="{{episode.artwork_path}}" alt="{{episode.text}}" class="img-fluid rounded"></a>
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            {% endcomment %}
+
+{% endblock dashboard_section %}

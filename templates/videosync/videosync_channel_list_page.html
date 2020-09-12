@@ -1,0 +1,59 @@
+{% extends "dashboard/base_dashboard.html" %}
+{% load static %}
+{% load humanize %}
+{% load bootstrap4 %}
+
+{% block dashboard_section %}
+
+        <!-- <div class="row">
+            <div class="col-lg-12">
+                <div class="card mb-3 mt-4">
+                    {% if podcast.youtube_connected %}
+                        <div class="card-body rounded">
+                            Your videos are being synced with <strong>{{podcast.youtube_channel_name}}</strong>
+                        </div>
+                    {% else %}
+                        <div class="card-body rounded no-border bg-red">
+                            <p>
+                                <strong>Setup required!</strong><br>
+                                You need to let us know what YouTube channel you'd like us to sync videos to.
+                            </p>
+                            <a href="{% url 'youtube_connect' podcast.slug %}" class="btn btn-styled btn-circle btn-white c-red btn-icon-left"><i class="fa fa-youtube"></i>Connect YouTube</a>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div> -->
+
+
+        {% for channel in object_list %}
+            {% with snippet=channel.snippet %}
+                <div class="card mb-3">
+                    <div class="row">
+
+                        <div class="col-lg-8">
+                            <div class="card-body pl-3 py-3">
+                                <h5 class="heading heading-6 strong-500">
+                                    <a href="">{{snippet.title}}</a>
+                                </h5>
+                                <div>
+                                    <form action="{% url 'youtube_channels_set' podcast.slug %}" method="post">
+                                        {% csrf_token %}
+                                        <input type="hidden" name="channel_name" value="{{snippet.title}}" />
+                                        <input type="hidden" name="channel_id" value="{{channel.id}}" />
+                                        <button type="submit" class="btn btn-styled btn-circle btn-white c-red">Use this Channel</button>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-lg-4">
+                            <div class="card-image">
+                                <img src="{{snippet.thumbnails.default.url}}" alt="{{snippet.title}}" class="img-fluid rounded">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            {% endwith %}
+        {% endfor %}
+
+{% endblock dashboard_section %}

@@ -1,0 +1,67 @@
+{% if podcast.custom_font %}
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family={{podcast.custom_font.param}}:400,600,700,800">
+{% endif %}
+
+<style type="text/css">
+    .podart {
+        border: 1px solid #efefef;
+        width: 100%;
+        padding-top: 56.25%;
+        position: relative;
+        font-size: 150%;
+        line-height: 1.3;
+        background: black;
+        {% if podcast.font_name %}font-family: '{{podcast.custom_font.name}}', sans-serif;{% endif %}
+    }
+    .podart>* {
+        position: absolute;
+        z-index: 1;
+    }
+    .podart--branding {
+        top: 0;
+        right: 0;
+        z-index: 1000;
+        font-size: 40%;
+        background: rgba(0,0,0,.6);
+        color: white;
+        text-transform: uppercase;
+        font-family: 'DM Sans', 'Roboto', sans-serif;
+        padding: 0.7%;
+        line-height: 1;
+        border-radius: 0 0 0 5px;
+    }
+    .podart .podart--mask,
+    .podart .podart--text-container,
+    .podart .podart--episode-image {
+        top: 0;
+        left: 0;
+        bottom: 0;
+        right: 0;
+    }
+    .podart .podart--mask {
+        position: absolute;
+        width: 100%;
+        height: 100%;
+        z-index: 2;
+    }
+    .podart .podart--text-container {
+        z-index: 4;
+    }
+    .podart .podart--text-container * {
+        color: inherit;
+    }
+    .podart .podart--episode-image {
+        width: 100%;
+        height: 100%;
+        z-index: 0;
+        background-position: center center;
+        background-repeat: no-repeat;
+        background-size: cover;
+    }
+    .podart .podart--show-logo {
+        max-width: 100%;
+        z-index: 3;
+        max-height: 25%;
+    }
+
+</style>
